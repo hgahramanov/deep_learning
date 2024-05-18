@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include <time.h>
 
 double generateRandom(double lower_bound, double upper_bound){
   double val = (double)std::rand() / RAND_MAX;
@@ -16,7 +17,7 @@ Matrix::Matrix(std::vector<std::vector<double>>vec){
   }
 }
 
-void Matrix::T(){
+Matrix Matrix::T(){
   std::vector<std::vector<double>>vec;
   for(int i = 0; i<Matrix::size.col_size; i++){
     vec.push_back({});
@@ -24,8 +25,8 @@ void Matrix::T(){
       vec[i].push_back(Matrix::matrix[j][i]);
     }
   }
-  Matrix::matrix = std::move(vec); //questionable moment. vec is passed as a reference not copied.
-  std::swap(Matrix::size.row_size, Matrix::size.col_size);  
+
+  return Matrix(vec);
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix& matriks){
@@ -38,6 +39,34 @@ std::ostream& operator<<(std::ostream& os, const Matrix& matriks){
     os<<std::endl;
   }
   return os;
+}
+
+Matrix operator*(Matrix& A, Matrix& B){
+  std::vector<std::vector<double>> vec;
+  double lin_comb;
+  try{
+    if(A.size.col_size == B.size.row_size){
+      for(int i=0; i<A.size.row_size; i++){
+        vec.push_back({});
+        for(int j = 0; j<B.size.col_size; j++){
+          lin_comb = 0;
+          for(int k=0; k<A.size.col_size; k++){
+             lin_comb= lin_comb + (A.matrix[i][k] * B.matrix[k][j]);
+          }
+          vec[i].push_back(lin_comb);
+        }
+      }
+    }
+
+    else{
+      throw 505;
+    }
+  }
+
+  catch(...){
+    std::cout<<"Matrix sizes do not match for multiplication"<<std::endl;
+  }
+  return Matrix(vec);
 }
 
 Matrix operator+(Matrix& A, Matrix& B){
@@ -83,6 +112,9 @@ Matrix generateOnes(const int row_size, const int col_size){
 
 Matrix generateRandom(const int row_size, const int col_size, double lower_bound, double upper_bound){
   std::vector<std::vector<double>> vec;
+  struct timespec ts;
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  srand((time_t)ts.tv_nsec);
   for(int i=0; i<row_size; i++){
     vec.push_back({});
     for(int j=0; j<col_size; j++){
@@ -99,10 +131,11 @@ int main(){
   std::cout<<mat<<std::endl;
   Matrix mat2 = generateOnes(6, 10);
   Matrix mat3 = generateRandom(10, 2, 0, 1);
-  std::cout<<mat3<<'\n';
-  mat3.T();
-  std::cout<<mat3<<'\n';
-  std::cout<<mat3.size.row_size<<" "<<mat3.size.col_size<<'\n';
-  std::cout<<mat3+mat3<<"\n";
+  //std::cout<<mat3<<mat3.size.row_size<<" "<<mat3.size.col_size<<'\n';
+  Matrix mat4(std::vector<std::vector<double>>({{2, 4}, {6, 8}, {10, 12}}));
+  std::cout<<mat4<<'\n';
+  Matrix a = mat*mat4;
+  std::cout<<a<<a.size.col_size<<"\n";
+  std::cout<<mat3;
   return 0;
 }

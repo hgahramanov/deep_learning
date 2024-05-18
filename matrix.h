@@ -22,6 +22,7 @@ class Matrix{
     friend Matrix generateOnes(const int row_size, const int col_size);
     friend Matrix generateRandom(const int row_size, const int col_size, double lower_bound, double upper_bound); //between the range
     friend Matrix operator*(Matrix&, Matrix&);
-    void T();
+    Matrix T();
     friend std::ostream& operator<<(std::ostream&, const Matrix&);
+    friend Matrix operator+(Matrix&, Matrix&);
 };
